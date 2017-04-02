@@ -20,16 +20,20 @@ var app = {
 		  access_token: 'pk.eyJ1Ijoia2FiaXJ1bGVzIiwiYSI6ImNqMHB2bXh3YzAxYmIyd3FhcXA4bHBmOTIifQ.l0K5d65aWdssaoRUdkfLLw'
 		}).addTo(myMap);
 		
-		app.renderMarker([position.coords.latitude, position.coords.longitude], 'Here I am!', myMap);
+		//app.renderMarker([position.coords.latitude, position.coords.longitude], 'Here I am!', myMap);
+		//Current marker
+		L.marker([position.coords.latitude, position.coords.longitude]).addTo(myMap).bindPopup('Here I am').openPopup();
 		
-		myMap.on('click', function(myEvent){
+		
+		myMap.on('dblclick', function(myEvent){
 		  var myText = 'Marker in l(' + myEvent.latlng.lat.toFixed(2) + ') and L(' + myEvent.latlng.lng.toFixed(2) + ')';
+		  if (myMarker) myMap.removeLayer(myMarker);
 		  app.renderMarker(myEvent.latlng, myText, myMap);
 		});
 	},
 	
 	renderMarker: function(latlng, myText, map){
-		var myMarker = L.marker(latlng).addTo(map);
+		myMarker = L.marker(latlng).addTo(map);
 		myMarker.bindPopup(myText).openPopup();
 	},
 
@@ -41,12 +45,7 @@ var app = {
 
 if ('addEventListener' in document) {
 	
-	var height = window.innerWidth;
-	var width = window.innerHeight;
-	var pixelRatio  = window.devicePixelRatio || 1; /// get pixel ratio of device
-	
-	document.getElementById('map').setAttribute("style","width: " + width*pixelRatio + "px");
-	document.getElementById('map').setAttribute("style","height: " + (height*pixelRatio)*0.65 + "px");
+	var myMarker;
 	
 	document.addEventListener('DOMContentLoaded', function() {
 		app.init();

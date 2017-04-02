@@ -2,12 +2,21 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+        <!--<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">-->
 		<link rel="stylesheet" type="text/css" href="css/carpark.css"/>
 		<link rel="stylesheet" type="text/css" href="css/leaflet.css"/>
         <title>CarPark</title>
     </head>
     <body>
+		<div class="header">header text</div>
+		<div style="text-align:center;padding-left:5px;padding-right:5px;">
+			<div id="map"></div>
+		</div>
+		<div class="footer">footer text</div>
         <script type="text/javascript" src="cordova.js"></script>
+		<script type="text/javascript" src="js/fastclick.js"></script>
+		<script type="text/javascript" src="js/carpark.js"></script>
+		<script type="text/javascript" src="js/leaflet.js"></script>		
     </body>
 </html>

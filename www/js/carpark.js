@@ -20,21 +20,23 @@ var app = {
 		  access_token: 'pk.eyJ1Ijoia2FiaXJ1bGVzIiwiYSI6ImNqMHB2bXh3YzAxYmIyd3FhcXA4bHBmOTIifQ.l0K5d65aWdssaoRUdkfLLw'
 		}).addTo(myMap);
 		
-		//app.renderMarker([position.coords.latitude, position.coords.longitude], 'Here I am!', myMap);
 		//Current marker
-		L.marker([position.coords.latitude, position.coords.longitude]).addTo(myMap).bindPopup('Here I am').openPopup();
+		L.marker([position.coords.latitude, position.coords.longitude]).addTo(myMap).bindPopup('Here I am!').openPopup();
 		
 		
-		myMap.on('dblclick', function(myEvent){
+		//Listener for longpress on map
+		myMap.on('contextmenu', function(myEvent){
 		  var myText = 'Marker in l(' + myEvent.latlng.lat.toFixed(2) + ') and L(' + myEvent.latlng.lng.toFixed(2) + ')';
 		  if (myMarker) myMap.removeLayer(myMarker);
 		  app.renderMarker(myEvent.latlng, myText, myMap);
 		});
 	},
 	
+	//renders myMarker
 	renderMarker: function(latlng, myText, map){
 		myMarker = L.marker(latlng).addTo(map);
-		myMarker.bindPopup(myText).openPopup();
+		//Not binding/showing popup by now
+		//myMarker.bindPopup(myText).openPopup();
 	},
 
 	errorOnGeoReq: function(error) {
@@ -45,7 +47,8 @@ var app = {
 
 if ('addEventListener' in document) {
 	
-	var myMarker;
+	//Marker for the car position (only one available)
+	var myMarker; 
 	
 	document.addEventListener('DOMContentLoaded', function() {
 		app.init();

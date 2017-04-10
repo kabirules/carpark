@@ -18,3 +18,5 @@ Pending
 1. Button to set the marker on current position
 2. Header with app usage info.
 3. Remove popups?
+4. Save markers on device storage -> Done!
+5. Remove saved marker when a new marker is set

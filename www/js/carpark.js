@@ -1,4 +1,7 @@
 var app = {
+	
+	carParkData: {"lat": "5", "lng": "5"},	
+	
 	init: function() {
 		this.initFastClick();
 	},
@@ -9,6 +12,7 @@ var app = {
 	
 	devReady: function() {
 		navigator.geolocation.getCurrentPosition(app.renderCoordsInMap, app.errorOnGeoReq);
+		app.leerDatos();
 	},
 	
 	renderCoordsInMap: function(position){
@@ -20,8 +24,12 @@ var app = {
 		  access_token: 'pk.eyJ1Ijoia2FiaXJ1bGVzIiwiYSI6ImNqMHB2bXh3YzAxYmIyd3FhcXA4bHBmOTIifQ.l0K5d65aWdssaoRUdkfLLw'
 		}).addTo(myMap);
 		
-		//Current marker
+		//Marker for current position
 		L.marker([position.coords.latitude, position.coords.longitude]).addTo(myMap).bindPopup('Here I am!').openPopup();
+		
+		//Marker for last saved position
+		L.marker([app.carParkData.lat, app.carParkData.lng]).addTo(myMap).bindPopup('Here I parked!').openPopup();
+
 		
 		
 		//Listener for longpress on map
@@ -29,6 +37,11 @@ var app = {
 		  var myText = 'Marker in l(' + myEvent.latlng.lat.toFixed(2) + ') and L(' + myEvent.latlng.lng.toFixed(2) + ')';
 		  if (myMarker) myMap.removeLayer(myMarker);
 		  app.renderMarker(myEvent.latlng, myText, myMap);
+		  var lat = myEvent.latlng.lat.toFixed(2);
+		  var lng = myEvent.latlng.lng.toFixed(2);
+		  var carPos = {"lat":lat, "lng":lng};
+		  app.carParkData = carPos;
+		  app.grabarDatos();
 		});
 	},
 	
@@ -41,7 +54,61 @@ var app = {
 
 	errorOnGeoReq: function(error) {
 		console.log(error.code + ': ' + error.message);
-	}
+	},
+	
+//SAVING DATA -INIT-	
+	grabarDatos: function() {
+		window.resolveLocalFileSystemURL(cordova.file.externalApplicationStorageDirectory, this.gotFS, this.fail);
+	},
+
+	gotFS: function(fileSystem) {
+		fileSystem.getFile("files/"+"model.json", {create: true, exclusive: false}, app.gotFileEntry, app.fail);
+	},
+
+	gotFileEntry: function(fileEntry) {
+		fileEntry.createWriter(app.gotFileWriter, app.fail);
+	},
+
+	gotFileWriter: function(writer) {
+		writer.onwriteend = function(evt) {
+		  console.log("datos grabados en externalApplicationStorageDirectory");
+		};
+	writer.write(JSON.stringify(app.carParkData));
+	},
+// SAVING DATA -END	-
+
+// READING DATA -INIT-  
+	leerDatos: function() {
+		window.resolveLocalFileSystemURL(cordova.file.externalApplicationStorageDirectory, this.obtenerFS, this.fail);
+	},
+	
+  obtenerFS: function(fileSystem) {
+    fileSystem.getFile("files/"+"model.json", null, app.obtenerFileEntry, app.noFile);
+  },
+  
+  obtenerFileEntry: function(fileEntry) {
+    fileEntry.file(app.leerFile, app.fail);
+  },
+
+  leerFile: function(file) {
+    var reader = new FileReader();
+    reader.onloadend = function(evt) {
+      var data = evt.target.result;
+      app.carParkData = JSON.parse(data);
+    };
+    reader.readAsText(file);
+  },
+
+  noFile: function(error) {
+    console.log(error.code);
+	alert('noFile');
+  },
+
+  fail: function(error) {
+    console.log(error.code);
+	alert('fail');
+  }
+// READING DATA -END-   
 	
 };
 

@@ -1,6 +1,6 @@
 var app = {
 	
-	carParkData: {"lat": "5", "lng": "5"},	
+	carParkData: {"lat": "5", "lng": "5"},
 	
 	init: function() {
 		this.initFastClick();
@@ -16,6 +16,17 @@ var app = {
 	},
 	
 	renderCoordsInMap: function(position){
+		
+		var newIcon = L.icon({
+				iconUrl: 'css/images/new-marker-icon-2x.png',
+				shadowUrl: 'css/images/marker-shadow.png',			
+				iconSize:     [15, 15],
+				shadowSize:   [15, 15],
+				iconAnchor:   [8, 8],
+				shadowAnchor: [0, 0],
+				popupAnchor:  [0, -8]
+		});
+	
 		var myMap = L.map('map').setView([position.coords.latitude, position.coords.longitude], 13);
 
 		L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v10/tiles/256/{z}/{x}/{y}?access_token={access_token}', {
@@ -24,21 +35,25 @@ var app = {
 		  access_token: 'pk.eyJ1Ijoia2FiaXJ1bGVzIiwiYSI6ImNqMHB2bXh3YzAxYmIyd3FhcXA4bHBmOTIifQ.l0K5d65aWdssaoRUdkfLLw'
 		}).addTo(myMap);
 		
+		myMap.setZoom(16);
+		
 		//Marker for current position
-		L.marker([position.coords.latitude, position.coords.longitude]).addTo(myMap).bindPopup('Here I am!').openPopup();
+		L.marker([position.coords.latitude, position.coords.longitude],{icon: newIcon}).addTo(myMap).bindPopup('Here I am!').openPopup();
 		
 		//Marker for last saved position
-		L.marker([app.carParkData.lat, app.carParkData.lng]).addTo(myMap).bindPopup('Here I parked!').openPopup();
+		readMarker = L.marker([app.carParkData.lat, app.carParkData.lng],{icon: newIcon}).addTo(myMap).bindPopup('Here I parked!').openPopup();
 
 		
 		
 		//Listener for longpress on map
 		myMap.on('contextmenu', function(myEvent){
-		  var myText = 'Marker in l(' + myEvent.latlng.lat.toFixed(2) + ') and L(' + myEvent.latlng.lng.toFixed(2) + ')';
+		  //var myText = 'Marker in l(' + myEvent.latlng.lat.toFixed(2) + ') and L(' + myEvent.latlng.lng.toFixed(2) + ')';
+		  var myText = 'Here I parked!';
 		  if (myMarker) myMap.removeLayer(myMarker);
-		  app.renderMarker(myEvent.latlng, myText, myMap);
-		  var lat = myEvent.latlng.lat.toFixed(2);
-		  var lng = myEvent.latlng.lng.toFixed(2);
+		  if (readMarker) myMap.removeLayer(readMarker);
+		  app.renderMarker(myEvent.latlng, myText, myMap, newIcon);
+		  var lat = myEvent.latlng.lat.toFixed(8);
+		  var lng = myEvent.latlng.lng.toFixed(8);
 		  var carPos = {"lat":lat, "lng":lng};
 		  app.carParkData = carPos;
 		  app.grabarDatos();
@@ -46,10 +61,10 @@ var app = {
 	},
 	
 	//renders myMarker
-	renderMarker: function(latlng, myText, map){
-		myMarker = L.marker(latlng).addTo(map);
-		//Not binding/showing popup by now
-		//myMarker.bindPopup(myText).openPopup();
+	renderMarker: function(latlng, myText, map, newIcon){
+		myMarker = L.marker(latlng,{icon: newIcon}).addTo(map);
+		//Not showing popup by now
+		myMarker.bindPopup(myText);//.openPopup();
 	},
 
 	errorOnGeoReq: function(error) {
@@ -115,7 +130,10 @@ var app = {
 if ('addEventListener' in document) {
 	
 	//Marker for the car position (only one available)
-	var myMarker; 
+	var myMarker;
+	
+	//Marker for the read position
+	var readMarker;
 	
 	document.addEventListener('DOMContentLoaded', function() {
 		app.init();

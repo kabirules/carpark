@@ -1,14 +1,19 @@
 var app = {
 	
-	carParkData: {"lat": "5", "lng": "5"},
+	carParkData: {"lat": "0", "lng": "0"},
 	
 	init: function() {
 		this.initFastClick();
+        this.initButton();
 	},
 	
 	initFastClick: function () {
 		FastClick.attach(document.body);
 	},
+    
+    initButton: function () {
+        parkButton = document.querySelector('#parkButton');
+    },
 	
 	devReady: function() {
 		navigator.geolocation.getCurrentPosition(app.renderCoordsInMap, app.errorOnGeoReq);
@@ -30,7 +35,7 @@ var app = {
 		var myMap = L.map('map').setView([position.coords.latitude, position.coords.longitude], 13);
 
 		L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v10/tiles/256/{z}/{x}/{y}?access_token={access_token}', {
-		  attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		  attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ï¿½ <a href="http://mapbox.com">Mapbox</a>',
 		  maxZoom: 18,
 		  access_token: 'pk.eyJ1Ijoia2FiaXJ1bGVzIiwiYSI6ImNqMHB2bXh3YzAxYmIyd3FhcXA4bHBmOTIifQ.l0K5d65aWdssaoRUdkfLLw'
 		}).addTo(myMap);
@@ -38,7 +43,7 @@ var app = {
 		myMap.setZoom(16);
 		
 		//Marker for current position
-		L.marker([position.coords.latitude, position.coords.longitude],{icon: newIcon}).addTo(myMap).bindPopup('Here I am!').openPopup();
+		myMarker = L.marker([position.coords.latitude, position.coords.longitude],{icon: newIcon}).addTo(myMap).bindPopup('Here I am!').openPopup();
 		
 		//Marker for last saved position
 		readMarker = L.marker([app.carParkData.lat, app.carParkData.lng],{icon: newIcon}).addTo(myMap).bindPopup('Here I parked!').openPopup();
@@ -48,8 +53,8 @@ var app = {
 		//Listener for longpress on map
 		myMap.on('contextmenu', function(myEvent){
 		  //var myText = 'Marker in l(' + myEvent.latlng.lat.toFixed(2) + ') and L(' + myEvent.latlng.lng.toFixed(2) + ')';
-		  var myText = 'Here I parked!';
-		  if (myMarker) myMap.removeLayer(myMarker);
+		  var myText = 'Here I parked! - Longpress';
+		  //if (myMarker) myMap.removeLayer(myMarker);
 		  if (readMarker) myMap.removeLayer(readMarker);
 		  app.renderMarker(myEvent.latlng, myText, myMap, newIcon);
 		  var lat = myEvent.latlng.lat.toFixed(8);
@@ -58,13 +63,32 @@ var app = {
 		  app.carParkData = carPos;
 		  app.grabarDatos();
 		});
+        
+        //Listener for parkButton TODO unify this listeners
+        parkButton.addEventListener('click', setParkPlaceWithButton, false);
+        
+        function setParkPlaceWithButton() {
+            var myText = 'Here I parked! - Button';
+            //if (myMarker) myMap.removeLayer(myMarker);
+            if (readMarker) myMap.removeLayer(readMarker);
+            navigator.geolocation.getCurrentPosition(getPos, app.errorOnGeoReq);
+        };
+        
+        function getPos(position) {
+            var lat = position.coords.latitude.toFixed(8);
+            var lng = position.coords.longitude.toFixed(8);
+            app.renderMarker([lat,lng], myText, myMap, newIcon);
+            var carPos = {"lat":lat, "lng":lng};
+            app.carParkData = carPos;
+            app.grabarDatos();
+        };
 	},
 	
-	//renders myMarker
+	//renders readMarker
 	renderMarker: function(latlng, myText, map, newIcon){
-		myMarker = L.marker(latlng,{icon: newIcon}).addTo(map);
+		readMarker = L.marker(latlng,{icon: newIcon}).addTo(map);
 		//Not showing popup by now
-		myMarker.bindPopup(myText);//.openPopup();
+		readMarker.bindPopup(myText);//.openPopup();
 	},
 
 	errorOnGeoReq: function(error) {
@@ -129,11 +153,14 @@ var app = {
 
 if ('addEventListener' in document) {
 	
-	//Marker for the car position (only one available)
+	//Marker for the current position
 	var myMarker;
 	
-	//Marker for the read position
+	//Marker for the last saved position
 	var readMarker;
+    
+    //Button to set the current place as parking place
+    var parkButton;
 	
 	document.addEventListener('DOMContentLoaded', function() {
 		app.init();
